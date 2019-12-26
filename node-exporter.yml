@@ -1,0 +1,8 @@
+---
+- name: node-exporter
+  hosts: arun
+  gather_facts: false
+  become: yes
+  tasks:
+  roles:
+  - node-exporter

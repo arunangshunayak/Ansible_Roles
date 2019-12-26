@@ -1,0 +1,22 @@
+---
+# tasks file for nginx_load
+- name: Update
+  command: apt-get update
+
+- name: Install Nginx
+  apt:
+   name: nginx
+   state: present
+
+- name: nginx
+  template:
+       src: default.j2
+       dest: /etc/nginx/sites-available/default
+
+- name: Link
+  file:
+      src: /etc/nginx/sites-available/default
+      dest: /etc/nginx/sites-enabled/default
+      state: link
+  notify:
+       - Nginx Restart

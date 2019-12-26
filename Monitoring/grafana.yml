@@ -1,0 +1,10 @@
+---
+- name: Grafana Installation
+  hosts: arun
+  gather_facts: false
+  become: yes
+  tasks:
+  roles:
+  - grafana
+
+

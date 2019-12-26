@@ -1,0 +1,48 @@
+---
+# tasks file for node-exporter
+#
+- name: Installing python
+  apt:
+    name: python3.6
+
+- name: Add the user 'node_exporter'
+  user:
+    name: node_exporter
+    shell: /bin/false
+    state: present
+
+- name: Downloading node_exporter
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+    dest: /tmp
+
+- name: Extract node_exporter into /tmp
+  unarchive:
+    src: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copying node_exporter binary file to /usr/local/bin
+  copy:
+    src: /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter
+    dest: /usr/local/bin
+    owner: node_exporter
+    group: node_exporter
+    remote_src: yes
+    mode: 0755
+
+- name: Creating service file
+  copy:
+    src: node_exporter.service
+    dest: /etc/systemd/system/
+    owner: node_exporter
+    group: node_exporter
+
+- name: daemon-reloading
+  systemd:
+    daemon_reload: yes
+
+- name: Start service node_exporter if not started
+  service:
+    name: node_exporter
+    state: started
