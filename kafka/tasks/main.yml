@@ -1,0 +1,11 @@
+---
+
+- name: installing kafka on debian machine
+  include: testdebian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: installing kafka in centos machine
+  include: centos1.yml
+  when: ansible_os_family == 'RedHat'
+
+         

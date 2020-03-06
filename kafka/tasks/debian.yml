@@ -1,0 +1,43 @@
+---
+- name: Creating user for kafka
+  user:
+    name: kafka
+    shell: /bin/false
+    create_home: yes
+    state: present
+
+- name: Downloading kafka
+  get_url:
+    url: https://www-eu.apache.org/dist/kafka/{{ kafka_version }}/kafka-{{ kafka_version }}-src.tgz
+    dest: /home/kafka/
+
+- name: Extracting apache_kafka into /home/kakfa/
+  unarchive:
+    src: /home/kafka/kafka-{{ kafka_version }}-src.tgz
+    dest: /home/kakfa/
+    remote_src: yes
+
+- name: Renaming Zookeeper file
+  command: mv /home/kakfa/apache-zookeeper-{{ zookeeper_version }} /home/kakfa/zookeeper
+
+- name: Renaming kafka file
+  command: mv /home/kakfa/kafka-{{ kafka_version }}-src /home/kakfa/kafka
+
+- name: Generating systemd service file for zookeeper
+  copy:
+    src: zookeeper.service
+    dest: /etc/systemd/system/
+    owner: kafka
+    group: kafka
+    mode: 0755
+    
+- name: Generating systemd service file for kafka
+  copy:
+    src: kafka.service
+    dest: /etc/systemd/system/
+    owner: kafka
+    group: kafka
+    mode: 0755
+  notify:
+    - daemon reload
+    - kafka restart

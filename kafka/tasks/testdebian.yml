@@ -1,0 +1,53 @@
+---
+- name: Creating user for kafka
+  user:
+    name: kafka
+    shell: /bin/false
+    create_home: true
+    groups: sudo
+    state: present
+
+- name: Updating repository 
+  raw: apt-get update
+
+- name: Installing JAVA(dependency of kafka)
+  apt: 
+    name: default-jdk
+    state: present
+
+- name: Extracting apache_kafka into /home/kakfa/
+  unarchive:
+    src:  https://www-eu.apache.org/dist/kafka/{{ kafka_major_version }}/kafka_{{ kafka_subversion }}-{{ kafka_major_version }}.tgz
+    dest: /home/kafka/
+    remote_src: yes
+
+- name: Renaming kafka file
+  command: mv /home/kafka/kafka_{{ kafka_subversion }}-{{ kafka_major_version }} /home/kafka/kafka/
+
+- name: Change ownership of a kafka directory
+  file:
+    path: /home/kafka/kafka/
+    state: directory
+    recurse: yes
+    owner: kafka
+    group: kafka
+
+- name: Generating systemd service file for zookeeper
+  copy:
+    src: zookeeper.service
+    dest: /etc/systemd/system/
+    owner: kafka
+    group: kafka
+    mode: 0755
+    
+- name: Generating systemd service file for kafka
+  copy:
+    src: kafka.service
+    dest: /etc/systemd/system/
+    owner: kafka
+    group: kafka
+    mode: 0755
+  notify:
+    - daemon reload
+    - zookeeper restart
+    - kafka restart

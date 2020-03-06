@@ -1,0 +1,30 @@
+---
+- name: Downloading dependencies of kafka
+  get_url:
+    url: http://apachemirror.wuchna.com/zookeeper/zookeeper-3.5.6/apache-zookeeper-3.5.6-bin.tar.gz
+    dest: /opt
+
+- name: Unarchiving files
+  unarchive:
+    src: /opt/apache-zookeeper-3.5.6-bin.tar.gz
+    dest: /opt
+    remote_src: yes
+
+- name: Renaming kafka file
+  command: mv /home/ubuntu/kafka_2.12-2.3.0 /opt/kafka
+
+- name: Generating systemd service file
+  template:
+    src: kafka.j2
+    dest: /etc/systemd/system/kafka.service
+  notify:
+    - kafka restart
+
+- name: Changing permission
+  file:
+    path: /etc/systemd/system/kafka.service
+    mode: 0755
+
+- name: Daemon-reloading
+  systemd:
+    daemon_reload: yes
